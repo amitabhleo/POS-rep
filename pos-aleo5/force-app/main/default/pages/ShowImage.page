@@ -1,0 +1,5 @@
+<apex:page >
+    <!--adding the static resource-->
+    <apex:includeScript value="{$Resource.vfimagetest}"/>
+    <apex:image url="{!URLfor($Resource.vfimagetest,'cats/kitten1.jpg')}"/>
+</apex:page>

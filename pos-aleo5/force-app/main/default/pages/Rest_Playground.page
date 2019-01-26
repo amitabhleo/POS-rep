@@ -1,0 +1,308 @@
+<!-- This page is used as POC to call REST API from Visualforce -->
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false">
+<style>
+    body
+    {
+        font-family: "Open Sans", Helvetica, Arial, sans-serif;
+        font-size : 0.8em;
+    }
+   lable
+   {
+        font-weight : bold;
+   }
+   .trace
+   {
+        background-color:
+        padding : 10px;
+        border: 1px solid #E0E0E0;
+        background-color: #F8F8F8;
+   }
+   pre
+   {
+        font-size : 1em;
+        white-space: pre-wrap; /* css-3 */
+        white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+        white-space: -pre-wrap; /* Opera 4-6 */
+        white-space: -o-pre-wrap; /* Opera 7 */
+        word-wrap: break-word; /* Internet Explorer 5.5+ */
+
+        line-height: 1.1em !important;
+        font-family: 'Monaco', courier, monospace;
+   }
+   .leftDiv
+   {
+       width: 70%;
+       float:left;
+   }
+   .rightDiv
+   {
+        width: 28%;
+        float:right;
+        background-color: #EEE;
+        border: 1px solid #aaa;
+        padding:5px;
+   }
+   .hlp
+   {
+        width: auto;
+        color: #000000;
+        background-color: #e5eecc;
+        margin: 0px;
+        padding: 5px;
+        border: 1px solid #d4d4d4;
+        background-image: linear-gradient( #ffffff , #e5eecc 100px);
+        font-weight:bold;
+        margin-top:20px;
+
+   }
+   a{
+        outline: none;
+        color: #21759b;
+    }
+    a:hover {
+        color: #0f3647;
+    }
+    .heading {
+        font-size : 2em;
+        text-align : center;
+        padding:10px;
+        background-color: #EEE;
+        font-weight : bold;
+        border: 1px solid #aaa;
+        margin-bottom : 10px;
+        color : #21759b;
+    }
+</style>
+
+<!-- Add remote site setting for cdnjs.cloudflare.com -->
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js"> </script>
+<div style="width:98%">
+    <div  class="leftDiv">
+    <div class="heading">
+        Salesforce REST API Playground
+    </div>
+        HTTP Request Type :
+        <label for="rad-Get"><input type="radio" id="rad-Get" name="requestType" value="GET" checked="true" />GET</label>
+        <label for="rad-POST"><input type="radio" id="rad-POST" name="requestType" value="POST" />POST</label>
+        <label for="rad-PATCH"><input type="radio" id="rad-PATCH" name="requestType" value="PATCH" />PATCH</label>
+        <label for="rad-Del"><input type="radio" id="rad-Del" name="requestType" value="DELETE" />DELETE</label>
+        <br />
+
+        REST URL : <input type="text" id="RESTURL" size="70" value="/services/data/v29.0/sobjects/Account/" />
+        <br />
+        Request Data :
+        <textarea rows="4" id="RestRequestData" cols="50"> {}  </textarea>
+
+        <input type="button" id="urlEntered" value="Execute Me" onclick="exec()" />
+
+        <br />
+
+        <div class="hlp" id="helpDiv">
+            Replace "Account" in REST URL by any other SObject.
+        </div>
+        <br />
+        <div id="errMsg" class="trace" style="display:none"/>
+
+    </div>
+
+    <div  class="rightDiv">
+
+    <h3> Salesforce Documentation Reference </h3>
+       <ul>
+           <li> <a href="https://www.salesforce.com/us/developer/docs/api_rest/"> REST API Developers Guide </a> </li>
+       </ul>
+
+    <h3> Metadata Related APIs</h3>
+       <ul>
+           <li> <a href="javascript:setVal(0);"> Get SObject Information </a> </li>
+           <li> <a href="javascript:setVal(1);"> List Available REST API Versions </a> </li>
+           <li> <a href="javascript:setVal(2);"> List Organization Limits</a> </li>
+           <li> <a href="javascript:setVal(3);"> List Available REST Resources </a> </li>
+           <li> <a href="javascript:setVal(4);"> Get a List of Objects </a> </li>
+           <li> <a href="javascript:setVal(5);"> Get Object's Metadata Info </a> </li>
+       </ul>
+
+      <h3> Working with Records </h3>
+       <ul>
+           <li> <a href="javascript:setVal(6);"> Create Record </a> </li>
+           <li> <a href="javascript:setVal(7);"> Update Record </a> </li>
+           <li> <a href="javascript:setVal(8);"> Delete Record </a> </li>
+           <li> <a href="javascript:setVal(9);"> Get Field Values from Records </a> </li>
+       </ul>
+
+    </div>
+</div>
+
+<script>
+
+    var $errMsg = $("#errMsg");
+    var $getOpt = $("#rad-Get");
+    var $postOpt = $("#rad-POST");
+    var $restUrl = $("#RESTURL")
+    var $RestResponse = $("#RestResponse");
+    var $reqData = $("#RestRequestData");
+    var $helpDiv = $("#helpDiv");
+    var $patch = $("#rad-PATCH");
+    var $radDel = $("#rad-Del");
+
+    var arrayOfRest = new Array();
+
+    function exec()
+    {
+
+        var postUrl = $restUrl.val();
+        var postData = $reqData.val();
+        var reqType = $('input:radio[name=requestType]:checked').val();
+        var heading = '<h3> Response : </h3> <br />';
+
+        resetResult();
+
+        $.ajax({
+          type: reqType,
+          beforeSend: function (xhr)
+                {
+                    xhr.setRequestHeader("Authorization",  'Bearer {!$API.Session_ID}');
+
+                },
+          headers : {'Content-Type' : 'application/json; charset=utf-8'},
+          url: postUrl,
+          data: postData,
+          dataType: 'text'
+        })
+         .done(function( data ) {
+
+                var res = JSON.stringify ($.parseJSON(data),null,'\t');
+                printResult(heading+"<pre>"+res+"</pre>");
+
+          })
+          .fail(function(xhr,textstatus,error){
+             var output = '<br /> <b> Status : </b>'+textstatus ;
+             output = output +  '<br /> <b> Error : </b>'+error ;
+             printResult(output);
+          });
+    }
+
+    function printResult(htmlVal)
+    {
+        $errMsg.html(htmlVal);
+        $errMsg.show();
+    }
+
+    function resetResult()
+    {
+        $errMsg.hide();
+        $errMsg.html("");
+    }
+
+    function setVal(ind)
+    {
+        //console.log('I am called');
+
+        var ret = arrayOfRest[ind];
+
+        if(ret != null)
+        {
+            if(ret.type == 'GET')
+                $getOpt.attr('checked', 'checked');
+            else if(ret.type == 'PATCH')
+                $patch.attr('checked', 'checked');
+            else if(ret.type == 'DELETE')
+                $radDel.attr('checked', 'checked');
+            else
+                $postOpt.attr('checked', 'checked');
+
+            $restUrl.val(ret.URL);
+            $reqData.val(ret.Body);
+            setHelpVal(ret.Help);
+            resetResult();
+        }
+
+    }
+
+    function setHelpVal(val)
+    {
+        if(val != null && val != '')
+        {
+            $helpDiv.show();
+            $helpDiv.html(val);
+        }
+        else
+            $helpDiv.hide();
+    }
+
+    function createJSONData(reqType,resURL,reqBody,hlp)
+    {
+        return {"type":reqType,"URL":resURL,"Body":reqBody,"Help":hlp} ;
+    }
+
+    function createData()
+    {
+        //Dont Change Sequence
+        arrayOfRest.push(  createJSONData(
+                            "GET",
+                            "/services/data/v29.0/sobjects/Account/",
+                            "{}",
+                            'Replace "<i>Account</i>" in REST URL by any other SObject.')) ;
+
+        arrayOfRest.push(  createJSONData(
+                            "GET",
+                            "/services/data/",
+                            "{}",
+                            "Use the Versions resource to list summary information about each REST API version currently available, including the version, label, and a link to each version's root. You do not need authentication to retrieve the list of versions.")) ;
+
+        arrayOfRest.push(  createJSONData(
+                            "GET",
+                            "/services/data/v29.0/limits/",
+                            "{}",
+                            'This s under PILOT Program. Contact Salesforce support to enable it in your organization')) ;
+
+        arrayOfRest.push(  createJSONData(
+                            "GET",
+                            "/services/data/v29.0/",
+                            "{}",
+                            'Use the Resources by Version resource to list the resources available for the specified API version. This provides the name and URI of each additional resource.')) ;
+
+        arrayOfRest.push(  createJSONData(
+                            "GET",
+                            "/services/data/v29.0/sobjects/",
+                            "{}",
+                            'Use the Describe Global resource to list the objects available in your organization and available to the logged-in user. This resource also returns the organization encoding, as well as maximum batch size permitted in queries.')) ;
+
+        arrayOfRest.push(  createJSONData(
+                            "GET",
+                            "/services/data/v29.0/sobjects/Account/describe",
+                            "{}",
+                            'Replace "<i>Account</i>" by Other Object Name to get Metadata Information')) ;
+
+        arrayOfRest.push(  createJSONData(
+                            "POST",
+                            "/services/data/v29.0/sobjects/Account/",
+                            '{"Name" : "Account By REST DEMO - By Jitendra"}',
+                            'Replace "<i>Account</i>" by Other Object Name, You will need to change JSON body also to provide rquired data for creation of record')) ;
+
+        arrayOfRest.push(  createJSONData(
+                            "PATCH",
+                 "/services/data/v29.0/sobjects/Account/0019000000osqEaAAI",
+                            '{"BillingCity" : "Nagpur"}',
+                            'If Success, <i>It will not return anything</i>')) ;
+
+        arrayOfRest.push(  createJSONData(
+                            "DELETE",
+            "/services/data/v29.0/sobjects/Account/0019000000osqEaAAI",
+                            '{}',
+                            'If Success, <i>It will not return anything</i>')) ;
+
+        arrayOfRest.push(  createJSONData(
+                            "GET",
+        "/services/data/v29.0/sobjects/Account/0019000000osqs0?fields=AccountNumber,BillingPostalCode",
+                            '{}',
+                            'provide valid <i>RecordId</i> and field names in GET URL')) ;
+
+    }
+
+    //Initialize Data
+    createData();
+
+</script>
+
+</apex:page>

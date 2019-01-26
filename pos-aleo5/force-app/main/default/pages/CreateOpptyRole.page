@@ -1,0 +1,11 @@
+<apex:page standardController="Opportunity" tabStyle="Opportunity">
+    <apex:pageBlock title="Opportunity">
+    <apex:form >
+        <apex:outputField value="{!Opportunity.Name}"/>
+        <apex:outputField value="{!Opportunity.StageName}"/>
+        </apex:form>
+    </apex:pageBlock>
+
+   <apex:relatedList subject="{!Opportunity}"  list="CombinedAttachments" />
+   <apex:relatedList list="ProcessSteps" ></apex:relatedList> 
+</apex:page>
