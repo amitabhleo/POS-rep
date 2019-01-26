@@ -1,7 +1,7 @@
 /*
   	@Amitabh January 21, 2019
 	I will be updating the POS source and POS Destination and POS products afer quering the POs order
-    checking if this can be updated from here
+    checking if this can be updated from here just connected the github need to test how this will work.
 
 */
 trigger POS_Order_Products_update1 on POS_Order_Products__c (after insert, before update,after update ){
