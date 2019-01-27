@@ -2,7 +2,7 @@
 @Amitabh January 21, 2019
 I will be updating the POS source and POS Destination and POS products afer quering the POs order
 checking if this can be updated from here
-
+@modified to update POS Item transaction on January 27, 2019
 */
 trigger POS_Order_Products_update1 on POS_Order_Products__c (after insert, before update,after update ){
 
@@ -61,17 +61,20 @@ if(trigger.isAfter){
             posInvTr.POS_Order_Product__c = posOrdPrd.Id;
             posInvTr.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
             posInvTr.POS_Product__c = posOrdPrd.POS_Products__c;
-            PosInvTr.Qty_Sold__c = 	posOrdPrd.Units__c;
+            PosInvTr.Qty_Sold__c = 	-1*(posOrdPrd.Units__c);
             PosInvTrsns.add(posInvTr);
-        if(mapInventory.containsKey(posOrdPrd.POS_Orders__r.destinationPOS_Id__c) && mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c)!=null)
+        if(mapInventory.containsKey(posOrdPrd.POS_Orders__r.destinationPOS_Id__c) 
+        && mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c)!=null)
+        {
         pop.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c).id;
         //Creating the 2nd POS order transaction recor d to show the double entry of the transaction
         POS_Inventory_Transaction__c posInvTr1 = new POS_Inventory_Transaction__c();
             posInvTr1.POS_Order_Product__c = posOrdPrd.Id;
-            posInvTr1.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
+            posInvTr1.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c).id;
             posInvTr1.POS_Product__c = posOrdPrd.POS_Products__c;
             PosInvTr1.Qty_Sold__c = posOrdPrd.Units__c;
             PosInvTrsns.add(posInvTr1);
+        }
         pop.updated__c=true;
         
         System.debug(pop.Id +'==='+mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c));
