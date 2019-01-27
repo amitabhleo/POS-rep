@@ -54,7 +54,9 @@ trigger POS_Order_Products_update1 on POS_Order_Products__c (after insert, befor
             pop.POS_Location__c = posOrdPrd.POS_Orders__r.destinationPOS_Id__c;
             
             pop.POS_Source_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
-            if(mapInventory.containsKey(posOrdPrd.POS_Orders__r.destinationPOS_Id__c) && mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c)!=null)
+            //reducing the inventory with the item ordered
+            if(mapInventory.containsKey(posOrdPrd.POS_Orders__r.destinationPOS_Id__c) && 
+                mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c)!=null)
             pop.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c).id;
             pop.updated__c=true;
             
