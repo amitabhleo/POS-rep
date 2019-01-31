@@ -57,6 +57,7 @@ if(trigger.isAfter){
         
         pop.POS_Source_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
         //Creating a first new POS Item Transaction here this will be used to update the TOtal items
+        //this fixes #1 in issues for this project
             POS_Inventory_Transaction__c posInvTr = new POS_Inventory_Transaction__c();
             posInvTr.POS_Order_Product__c = posOrdPrd.Id;
             posInvTr.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
