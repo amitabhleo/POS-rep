@@ -69,6 +69,7 @@ if(trigger.isAfter){
         {
         pop.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c).id;
         //Creating the 2nd POS order transaction recor d to show the double entry of the transaction
+         //this fixes #1 in issues for this project
         POS_Inventory_Transaction__c posInvTr1 = new POS_Inventory_Transaction__c();
             posInvTr1.POS_Order_Product__c = posOrdPrd.Id;
             posInvTr1.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c).id;
