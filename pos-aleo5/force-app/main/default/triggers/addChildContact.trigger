@@ -4,6 +4,7 @@ trigger addChildContact on Account (after insert, after update) {
     //The intent is that We can manage contact using the account hirerchy but would like to show all 
     //together at the HeadQuarter in a UI, so that we are able to create a VF page
    //passing all contacts Id to a list 
+   //this is not a completed code will check later
    
    Set<ID> ContactId ;
     For (Account acc:Trigger.new){
