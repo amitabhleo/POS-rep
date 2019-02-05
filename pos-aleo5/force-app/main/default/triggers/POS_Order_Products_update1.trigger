@@ -23,6 +23,7 @@ Map <ID,POS_Inventory__c> mapInventory = new Map<ID,POS_Inventory__c> ();
 List<POS_Inventory__c> posProdItems = new List<POS_Inventory__c>();
 List <POS_Order_Products__c> posOrdProds = new List<POS_Order_Products__c>();
 List <POS_Inventory_Transaction__c> PosInvTrsns = new List<POS_Inventory_Transaction__c>();
+Integer qtyInHand = 0;
 if(trigger.isAfter){
 
     //Step2 Iterating thru the product items and search for 
@@ -36,10 +37,13 @@ if(trigger.isAfter){
         pItm.POS_Location__c =posItem.POS_Location__c;
         //pItm.POS_Product__c = posItem.POS_Product__c;
         pItm.Qty_on_Hand__c = posItem.Qty_on_Hand__c;
+        qtyInHand = Integer.valueOf(posItem.Qty_on_Hand__c);
         posProdItems.add(pItm);
         mapInventory.put(posItem.POS_Location__c,posItem);
-
+        System.debug('value of qtyInHand'+qtyInHand);
     }
+    //adding POS items to update once POS transaction is created
+    POS_Inventory__c posInv = new POS_Inventory__c();
     //Step3 fetch the relevent details from POS Order Producsts
     for(POS_Order_Products__c posOrdPrd:[SELECT Id, Name, POS_Orders__c,POS_Orders__r.pos__c,
                                             POS_Orders__r.destinationPOS_Id__c, POS_Products__c, 
@@ -57,13 +61,19 @@ if(trigger.isAfter){
         
         pop.POS_Source_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
         //Creating a first new POS Item Transaction here this will be used to update the TOtal items
-        //this fixes #1 in issues for this project
+        //this fixes #1 in issues for this project 
+        //we can create a method and call this fuction with
             POS_Inventory_Transaction__c posInvTr = new POS_Inventory_Transaction__c();
             posInvTr.POS_Order_Product__c = posOrdPrd.Id;
             posInvTr.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
             posInvTr.POS_Product__c = posOrdPrd.POS_Products__c;
             PosInvTr.Qty_Sold__c = 	-1*(posOrdPrd.Units__c);
             PosInvTrsns.add(posInvTr);
+            //adding or reducing pos inventory product
+            posInv.Qty_on_Hand__c = qtyInHand + (-1*(posOrdPrd.Units__c));
+            posInv.id = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
+            posProdItems.add(posInv);
+            System.debug('value of posProduct Item'+posProdItems);
         if(mapInventory.containsKey(posOrdPrd.POS_Orders__r.destinationPOS_Id__c) 
         && mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c)!=null)
         {
@@ -87,7 +97,9 @@ if(trigger.isAfter){
 System.debug('value of Map'+mapInventory);
 System.debug('value of POSProduct Item'+posProdItems);
 System.debug('value of POSOrdProds'+posOrdProds);
+//upsert posProdItems;
 upsert posOrdProds;
 upsert PosInvTrsns;
+
 
 }
