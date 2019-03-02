@@ -1,4 +1,5 @@
 /*
+* @amitabh created on 2015 making it inactive
 * I have to create a Pos Inventory Transaction on every POS Order Product creation,
 * reducing the POS Inventory by the units sold and add the inventory to the second location
 * should also work on inventory transfer from one location to another to keep the Inventory
