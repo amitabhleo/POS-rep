@@ -13,11 +13,11 @@ Set<ID> prodIds = new Set<ID>();
 //to stop recursion we have to populate the values
 for (POS_Order_Products__c pop:Trigger.new)
 {
-    //if(trigger.isBefore){
+    //if(trigger.isBefore){ "did not return any value"
     if(pop.updated__c == false ){
         prodIds.add(pop.POS_Products__c);            
     }  
-    //}               
+        //}               
 }
 Map <ID,POS_Inventory__c> mapInventory = new Map<ID,POS_Inventory__c> ();
 List<POS_Inventory__c> posProdItems = new List<POS_Inventory__c>();
@@ -62,11 +62,12 @@ if(trigger.isAfter){
         pop.POS_Source_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
         //Creating a first new POS Item Transaction here this will be used to update the TOtal items
         //this fixes #1 in issues for this project 
-        //we can create a method and call this fuction with
+        //we can create a method and call this function from a Class
             POS_Inventory_Transaction__c posInvTr = new POS_Inventory_Transaction__c();
             posInvTr.POS_Order_Product__c = posOrdPrd.Id;
             posInvTr.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).id;
             posInvTr.POS_Product__c = posOrdPrd.POS_Products__c;
+            posInvTr.POS_Order__c = posOrdPrd.POS_Orders__c;
             PosInvTr.Qty_Sold__c = 	-1*(posOrdPrd.Units__c);
             PosInvTrsns.add(posInvTr);
             //adding or reducing pos inventory product
@@ -84,8 +85,18 @@ if(trigger.isAfter){
             posInvTr1.POS_Order_Product__c = posOrdPrd.Id;
             posInvTr1.POS_Inventory__c = mapInventory.get(posOrdPrd.POS_Orders__r.destinationPOS_Id__c).id;
             posInvTr1.POS_Product__c = posOrdPrd.POS_Products__c;
+            posInvTr1.POS_Order__c = posOrdPrd.POS_Orders__c;
             PosInvTr1.Qty_Sold__c = posOrdPrd.Units__c;
             PosInvTrsns.add(posInvTr1);
+        }
+        //Creating a new Pos Intentor destination
+        else {
+            POS_Inventory__c newPosItem = new POS_Inventory__c();
+            newPosItem.POS_Location__c = posOrdPrd.POS_Orders__r.destinationPOS_Id__c;
+            newPosItem.POS_Product__c = mapInventory.get(posOrdPrd.POS_Orders__r.pos__c).POS_Product__c;
+            newPosItem.name = 'to update later';
+            System.debug('value of NewPOSItem :' + newPosItem);
+           posProdItems.add(newPosItem);
         }
         pop.updated__c=true;
         
@@ -96,7 +107,6 @@ if(trigger.isAfter){
 }
 System.debug('value of Map'+mapInventory);
 System.debug('value of POSProduct Item'+posProdItems);
-System.debug('value of POSOrdProds'+posOrdProds);
 //upsert posProdItems;
 upsert posOrdProds;
 upsert PosInvTrsns;
