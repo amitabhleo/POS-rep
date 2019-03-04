@@ -12,7 +12,7 @@ trigger POS_Inventory_update on POS_Inventory_Transaction__c (after insert) {
     Set<ID> pInvIdsTo = new Set<ID>();
     Set<ID> pInvIdsFrom = new Set<ID>();
     Double qty_transfered = 0;
-    
+        
     for(POS_Inventory_Transaction__c pit: Trigger.new){
         //passing this trigger only when not an order
         if(pit.sold__c <> true){
