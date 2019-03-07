@@ -24,7 +24,8 @@ List<POS_Inventory__c> posProdItems = new List<POS_Inventory__c>();
 List <POS_Order_Products__c> posOrdProds = new List<POS_Order_Products__c>();
 List <POS_Inventory_Transaction__c> PosInvTrsns = new List<POS_Inventory_Transaction__c>();
 Integer qtyInHand = 0;
-if(trigger.isAfter){
+//changing to IsBefore and removing the upsert
+if(trigger.isBefore){
 
     //Step2 Iterating thru the product items and search for 
     //Map <ID,POS_Inventory__c> mapInventory = new Map<ID,POS_Inventory__c> ();
@@ -108,7 +109,7 @@ if(trigger.isAfter){
 System.debug('value of Map'+mapInventory);
 System.debug('value of POSProduct Item'+posProdItems);
 //upsert posProdItems;
-upsert posOrdProds;
+//upsert posOrdProds;
 upsert PosInvTrsns;
 
 
